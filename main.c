@@ -1,131 +1,104 @@
-#define _GNU_SOURCE
-#include "splitter.h"
+/*
+** Created by Glastis on 30/07/18.
+*/
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "header/main.h"
+#include "header/structure.h"
+#include "header/utilities.h"
+#include "header/process.h"
+#include "header/trace.h"
 
-static void	init_hes(t_opt *opt, t_info *info)
+#ifndef TRACE_DEBUG
+void                        debug_init()
 {
-  /* Opt structure initialisation */
-  opt->file = NULL;
-  opt->galaxy = NULL;
-  opt->sector = NULL;
-  opt->error = NULL;
 
-  /* Info structure initialisation */
-  info->output_fd = NULL;
-  info->input_fd = NULL;
-  info->galaxy_open = NULL;
-  info->sector_open = NULL;
-  info->choosen_galaxy = 0;
+}
+#endif
+
+static void                 init_opt(t_opt *opt, t_opt_init *init)
+{
+    opt->filename = NULL;
+    opt->system = NULL;
+    opt->sector = NULL;
+    opt->galaxy = NULL;
+    opt->ressource = NULL;
+    opt->min_quality = -1;
+    opt->max_quality = -1;
+
+    init->min_quality = NULL;
+    init->max_quality = NULL;
 }
 
-static int	get_opt(t_opt *opt, char **av, char **ags, int agsi)
+static int                  get_opt_detect(char **opt, const int next, const char *optstr, const char *optstr_short, const char **input)
 {
-  unsigned int	i;
-  
-  i = 0;
-  /* Unecessary commentary */
-  if (ags)
+    if (strcmp(input[0], optstr) && strcmp(input[0], optstr_short))
     {
-      /* In case of stupid user */
-      if (!ags[1] || ags[1][0] == '-')
-	{
-	  opt->error = ERROR_BAD_ARGUMENT;
-	  return (EXIT_FAILURE);
-	}
-      if (agsi == 0)
-	{
-	  if (opt->file)
-	    {
-	      opt->error = ERROR_REDEFINITION;
-	    }
-	  opt->file = ags[1];
-	}
-      else if (agsi == 1)
-	{
-	  if (opt->galaxy)
-	    {
-	      opt->error = ERROR_REDEFINITION;
-	    }
-	  opt->galaxy = ags[1];
-	}
-      else
-	{
-	  opt->error = DEVELOPPEMENT_PROCESS;
-	}
-      return (EXIT_SUCCESS);
+        return (FALSE);
     }
-  while (av[i])
+    if (next && !input[1])
     {
-      if (!strcmp(FILENAME_FLAG, av[i]) || !strcmp(FILENAME_FLAG_S, av[i]))
-	{
-	  /* Using same function instead of new one is pointless, fun only */
-	  get_opt(opt, NULL, &av[i], 0);
-	}
-      else if (!strcmp(GALAXY_FLAG, av[i]) || !strcmp(GALAXY_FLAG_S, av[i]))
-	{
-	  /* Using same function instead of new one is pointless, fun only */
-	  get_opt(opt, NULL, &av[i], 1);  
-	}
-      else if (!strcmp(SECTOR_FLAG, av[i]) || !strcmp(SECTOR_FLAG_S, av[i]))
-	{
-	  /* Using same function instead of new one is pointless, fun only */
-	  get_opt(opt, NULL, &av[i], 2);
-	}
-      else if (!strcmp(OUTPUT_FLAG, av[i]) || !strcmp(SECTOR_FLAG_S, av[i]))
-	{
-	  /* Using same function instead of new one is pointless, fun only */
-	  get_opt(opt, NULL, &av[i], 3);
-	}
-      ++i;
+        fprintf(stderr, "%s: %s\n", input[0], ERROR_ARGUMENT_VALUE);
+        return (FALSE);
     }
-  /* In case of stupid user */
-  if (!opt->galaxy && !opt->error)
-    {
-      opt->error = ERROR_UNSET_GALAXY;
-    }
-  if (!opt->file && !opt->error)
-    {
-      opt->error = ERROR_UNSET_FILE;
-    }
-  if (opt->error)
-    {
-      return (EXIT_FAILURE);
-    }
-  return (EXIT_SUCCESS);
+    opt[0] = (char *) input[1];
+    return (TRUE);
 }
 
-int		main(int ac, char **av)
+static void                 get_opt_init_cleanup(t_opt *opt, t_opt_init *init)
 {
-  char		*line;
-  size_t	len;
-  int		read;
-  t_opt		opt;
-  t_info	info;
-  
-  len = 0;
-  line = NULL;
-  init_hes(&opt, &info);
-  if (get_opt(&opt, &av[1], NULL, -1) || !(info.input_fd = fopen(opt.file, "r")) || !(info.output_fd = fopen(DEFAULT_OUTPUT, "w")))
+    opt->max_quality = init->max_quality ? atoi((char *)init->max_quality) : -1;
+    opt->min_quality = init->min_quality ? atoi((char *)init->min_quality) : -1;
+}
+
+static void                 get_opt(t_opt *opt, const char **av, const int ac)
+{
+    int                     i;
+    t_opt_init              opt_init;
+
+    i = 1;
+    init_opt(opt, &opt_init);
+    while (i < ac)
     {
-      if (opt.error)
-	{
-	  fprintf(stderr, "%s%s%s", "Error: ", opt.error, "\n");
-	  printf("%s", HELP);
-	}
-      return (EXIT_FAILURE);
+        if (!strcmp(OPT_HELP, av[i]) || !strcmp(OPT_HELP_SHOT, av[i]))
+        {
+            print_help();
+            exit(0);
+        }
+        else if (   !get_opt_detect(&opt->galaxy, TRUE, OPT_GALAXY, OPT_GALAXY_SHORT, &av[i])
+                 && !get_opt_detect(&opt->sector, TRUE, OPT_SECTOR, OPT_SECTOR_SHORT, &av[i])
+                 && !get_opt_detect(&opt->system, TRUE, OPT_SYSTEM, OPT_SYSTEM_SHORT, &av[i])
+                 && !get_opt_detect(&opt->filename, TRUE, OPT_FILE, OPT_FILE_SHORT, &av[i])
+                 && !get_opt_detect(&opt->ressource, TRUE, OPT_RESSOURCE, OPT_RESSOURCE_SHORT, &av[i])
+                 && !get_opt_detect(&opt_init.min_quality, TRUE, OPT_QUALITY_MAX, OPT_QUALITY_MAX_SHORT, &av[i])
+                 && !get_opt_detect(&opt_init.max_quality, TRUE, OPT_QUALITY_MIN, OPT_QUALITY_MIN_SHORT, &av[i]))
+        {
+            fprintf(stderr, "%s: %s\n", av[i], ERROR_ARGUMENT_IGNORED);
+        }
+        else
+        {
+            ++i;
+        }
+        ++i;
     }
-  while ((read = getline(&line, &len, info.input_fd)) != -1)
-    {
-      line_process(&opt, &info, line, read);
-    } 
-  fclose(info.input_fd);
-  fclose(info.output_fd);
-  if (line)
-    {
-      free(line);
-    }
-  return (EXIT_SUCCESS);
-  UNUSED(ac);
+    get_opt_init_cleanup(opt, &opt_init);
+}
+
+static void                 check_opt(t_opt *opt)
+{
+    UNUSED(opt);
+}
+
+int                         main(int ac, const char **av)
+{
+    t_opt                   opt;
+
+    UNUSED(ac);
+    debug_init();
+    get_opt(&opt, av, ac);
+    check_opt(&opt);
+    core_process(&opt);
+    return (0);
 }
