@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mman.h>
 #include "header/process.h"
 #include "header/utilities.h"
 
@@ -16,67 +17,54 @@ static void                 init_process(t_opt *opt, t_process *process)
     process->galaxy_opened = (opt->galaxy) ? FALSE : TRUE;
 }
 
-static int                  process_check_flag(t_opt *opt, t_process *process,const char *buff, int readed)
+static int                  process_check_flag_char(char *content, char *flag, char *name, int *bool, int boolset, unsigned int *i)
 {
-    int                     i;
-
-    i = 0;
-    while (i < readed)
+    if (name && comp_str(content, flag) && (!name || comp_str(&content[strlen(flag)], name)))
     {
-        if (opt->galaxy && comp_str(&buff[i], FLAG_GALAXY_NAME_BEG) && comp_str(&buff[i + sizeof(FLAG_GALAXY_NAME_BEG) - 1], opt->galaxy))
-        {
-            process->galaxy_opened = TRUE;
-            puts("opened");
-        }
-        ++i;
+        bool[0] = boolset;
+        i[0] += strlen(flag) + safe_strlen(name);
+        puts("test");
+        return (TRUE);
     }
     return (FALSE);
 }
 
-static void                 process_read(t_opt *opt, t_process *process, int fd)
+static int                  process_check_flag(t_opt *opt, t_process *process, unsigned int i)
 {
-    char                    buff[READ_SIZE + 1];
-    char                    *remember;
-    char                    *tmp;
-    int                     flag;
-    unsigned int            readed;
+    return (process_check_flag_char(&process->content[i], FLAG_GALAXY_BEG, opt->galaxy, &process->galaxy_opened, TRUE, &i)
+         || process_check_flag_char(&process->content[i], FLAG_GALAXY_END, opt->galaxy, &process->galaxy_opened, FALSE, &i)
+         || process_check_flag_char(&process->content[i], FLAG_SECTOR_BEG, opt->sector, &process->sector_opened, TRUE, &i)
+         || process_check_flag_char(&process->content[i], FLAG_SECTOR_END, opt->sector, &process->sector_opened, FALSE, &i)
+         || process_check_flag_char(&process->content[i], FLAG_SYSTEM_BEG, opt->system, &process->system_opened, TRUE, &i)
+         || process_check_flag_char(&process->content[i], FLAG_SYSTEM_END, opt->system, &process->system_opened, FALSE, &i));
+}
 
-    flag = FALSE;
-    remember = NULL;
-    while ((readed = (unsigned int) read(fd, buff, READ_SIZE)) > 0)
+static void                 process_content(t_opt *opt, t_process *process)
+{
+    unsigned int            i;
+
+    i = 0;
+    while (i < process->filesize)
     {
-        buff[readed] = '\0';
-        if (!remember)
-        {
-            remember = str_coupler(buff, NULL);
-        }
-        else if (!flag)
-        {
-            tmp = remember;
-            remember = str_coupler(remember, buff);
-            free(tmp);
-            flag = TRUE;
-        }
-        else
-        {
-            tmp = remember;
-            remember = str_coupler(&remember[readed], (char *)buff);
-            free(tmp);
-        }
-        if (process_check_flag(opt, process, remember, readed) >= 0)
-        {
-
-        }
+        process_check_flag(opt, process, i);
+        ++i;
     }
+}
+
+static void                 process_get_file(t_opt *opt, t_process *process)
+{
+    process->fd_out = safe_open_write(opt->outfile, TRUE);
+    process->fd_in = safe_open_read(opt->filename);
+    process->filesize = (unsigned int) lseek(process->fd_in, 0, SEEK_END);
+    process->content = mmap(NULL, process->filesize, PROT_READ, MAP_PRIVATE, process->fd_in, 0);
 }
 
 int                         core_process(t_opt *opt)
 {
     t_process               process;
-    int                     fd;
 
     init_process(opt, &process);
-    fd = safe_open_read(opt->filename);
-    process_read(opt, &process,fd);
+    process_get_file(opt, &process);
+    process_content(opt, &process);
     return (TRUE);
 }

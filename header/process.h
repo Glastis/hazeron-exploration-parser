@@ -7,7 +7,7 @@
 
 #include "structure.h"
 
-#define READ_SIZE                                   1000u /* Must be greater than flags and ressources names */
+#define READ_SIZE                                   100u /* Must be greater than flags and ressources names */
 
 #define FLAG_GALAXY_NAME_BEG                        "<galaxy name=\""
 #define FLAG_GALAXY_NAME_END                        "\">"

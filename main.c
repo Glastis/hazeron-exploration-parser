@@ -49,8 +49,8 @@ static int                  get_opt_detect(char **opt, const int next, const cha
 
 static void                 get_opt_init_cleanup(t_opt *opt, t_opt_init *init)
 {
-    opt->max_quality = init->max_quality ? atoi((char *)init->max_quality) : -1;
-    opt->min_quality = init->min_quality ? atoi((char *)init->min_quality) : -1;
+    opt->max_quality = init->max_quality ? atoi(init->max_quality) : -1;
+    opt->min_quality = init->min_quality ? atoi(init->min_quality) : -1;
 }
 
 static void                 get_opt(t_opt *opt, const char **av, const int ac)
@@ -71,6 +71,7 @@ static void                 get_opt(t_opt *opt, const char **av, const int ac)
                  && !get_opt_detect(&opt->sector, TRUE, OPT_SECTOR, OPT_SECTOR_SHORT, &av[i])
                  && !get_opt_detect(&opt->system, TRUE, OPT_SYSTEM, OPT_SYSTEM_SHORT, &av[i])
                  && !get_opt_detect(&opt->filename, TRUE, OPT_FILE, OPT_FILE_SHORT, &av[i])
+                 && !get_opt_detect(&opt->outfile, TRUE, OPT_FILE, OPT_FILE_SHORT, &av[i])
                  && !get_opt_detect(&opt->ressource, TRUE, OPT_RESSOURCE, OPT_RESSOURCE_SHORT, &av[i])
                  && !get_opt_detect(&opt_init.min_quality, TRUE, OPT_QUALITY_MAX, OPT_QUALITY_MAX_SHORT, &av[i])
                  && !get_opt_detect(&opt_init.max_quality, TRUE, OPT_QUALITY_MIN, OPT_QUALITY_MIN_SHORT, &av[i]))

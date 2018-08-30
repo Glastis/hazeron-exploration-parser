@@ -7,6 +7,8 @@
 
 #define OPT_FILE                                    "--file"
 #define OPT_FILE_SHORT                              "-f"
+#define OPT_OUTPUT                                  "--output"
+#define OPT_OUTPUT_SHORT                            "-o"
 #define OPT_GALAXY                                  "--galaxy"
 #define OPT_GALAXY_SHORT                            "-g"
 #define OPT_SECTOR                                  "--sector"

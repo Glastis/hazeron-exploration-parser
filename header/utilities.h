@@ -32,5 +32,6 @@ unsigned int                comp_str(const char *str1, const char *str2);
 unsigned int                str_greater_than(const char *str, unsigned int max);
 void                        str_init(t_str *str);
 int                         safe_open_read(const char *filename);
+int                         safe_open_write(const char *filename, int create);
 
 #endif /* !DOWNLOADER_UTILITIES_H */

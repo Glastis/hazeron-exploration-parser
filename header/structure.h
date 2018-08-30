@@ -8,6 +8,7 @@
 struct                      s_opt
 {
     char                    *filename;
+    char                    *outfile;
     char                    *system;
     char                    *sector;
     char                    *galaxy;
@@ -24,6 +25,10 @@ struct                      s_opt_init
 
 struct                      s_process
 {
+    char                    *content;
+    int                     fd_in;
+    int                     fd_out;
+    unsigned int            filesize;
     int                     system_opened;
     int                     sector_opened;
     int                     galaxy_opened;
