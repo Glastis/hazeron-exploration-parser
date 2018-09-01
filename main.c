@@ -27,6 +27,7 @@ static void                 init_opt(t_opt *opt, t_opt_init *init)
     opt->ressource = NULL;
     opt->min_quality = -1;
     opt->max_quality = -1;
+    opt->outfile = NULL;
 
     init->min_quality = NULL;
     init->max_quality = NULL;
@@ -89,6 +90,10 @@ static void                 get_opt(t_opt *opt, const char **av, const int ac)
 
 static void                 check_opt(t_opt *opt)
 {
+    if ((opt->galaxy && opt->sector) || (opt->galaxy && opt->system) || (opt->sector && opt->system))
+    {
+        error(ERROR_ARGUMENT_MULTIPLE_LOCATION);
+    }
     UNUSED(opt);
 }
 

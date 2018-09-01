@@ -7,36 +7,43 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
+#include "header/xml_parser.h"
 #include "header/process.h"
 #include "header/utilities.h"
 
+static void                 open_location_galaxy(t_opt *opt, t_process *process, unsigned int *i)
+{
+    i[0] = move_to_flag(process->content, FLAG_GALAXY, FLAG_GALAXY_ATR_NAME, opt->galaxy);
+}
+
+static void                 open_location_sector(t_opt *opt, t_process *process, unsigned int *i)
+{
+    i[0] = move_to_flag(process->content, FLAG_SECTOR, FLAG_SECTOR_ATR_NAME, opt->sector);
+}
+
+static void                 open_location_system(t_opt *opt, t_process *process, unsigned int *i)
+{
+    i[0] = move_to_flag(process->content, FLAG_SYSTEM, FLAG_SYSTEM_ATR_NAME, opt->system);
+}
+
 static void                 init_process(t_opt *opt, t_process *process)
 {
-    process->system_opened = (opt->system) ? FALSE : TRUE;
-    process->sector_opened = (opt->sector) ? FALSE : TRUE;
-    process->galaxy_opened = (opt->galaxy) ? FALSE : TRUE;
-}
-
-static int                  process_check_flag_char(char *content, char *flag, char *name, int *bool, int boolset, unsigned int *i)
-{
-    if (name && comp_str(content, flag) && (!name || comp_str(&content[strlen(flag)], name)))
+    if (opt->galaxy)
     {
-        bool[0] = boolset;
-        i[0] += strlen(flag) + safe_strlen(name);
-        puts("test");
-        return (TRUE);
+        process->open_location = &open_location_galaxy;
     }
-    return (FALSE);
-}
-
-static int                  process_check_flag(t_opt *opt, t_process *process, unsigned int i)
-{
-    return (process_check_flag_char(&process->content[i], FLAG_GALAXY_BEG, opt->galaxy, &process->galaxy_opened, TRUE, &i)
-         || process_check_flag_char(&process->content[i], FLAG_GALAXY_END, opt->galaxy, &process->galaxy_opened, FALSE, &i)
-         || process_check_flag_char(&process->content[i], FLAG_SECTOR_BEG, opt->sector, &process->sector_opened, TRUE, &i)
-         || process_check_flag_char(&process->content[i], FLAG_SECTOR_END, opt->sector, &process->sector_opened, FALSE, &i)
-         || process_check_flag_char(&process->content[i], FLAG_SYSTEM_BEG, opt->system, &process->system_opened, TRUE, &i)
-         || process_check_flag_char(&process->content[i], FLAG_SYSTEM_END, opt->system, &process->system_opened, FALSE, &i));
+    else if (opt->sector)
+    {
+        process->open_location = &open_location_sector;
+    }
+    else if (opt->system)
+    {
+        process->open_location = &open_location_system;
+    }
+    else
+    {
+        process->open_location = NULL;
+    }
 }
 
 static void                 process_content(t_opt *opt, t_process *process)
@@ -44,16 +51,20 @@ static void                 process_content(t_opt *opt, t_process *process)
     unsigned int            i;
 
     i = 0;
-    while (i < process->filesize)
+    if (process->open_location)
     {
-        process_check_flag(opt, process, i);
+        process->open_location(opt, process, &i);
+    }
+    while (get_next_flag(&process->content[i], NULL, &i))
+    {
+        printf("%d\n", i);
         ++i;
     }
 }
 
 static void                 process_get_file(t_opt *opt, t_process *process)
 {
-    process->fd_out = safe_open_write(opt->outfile, TRUE);
+//    process->fd_out = safe_open_write(opt->outfile, TRUE);
     process->fd_in = safe_open_read(opt->filename);
     process->filesize = (unsigned int) lseek(process->fd_in, 0, SEEK_END);
     process->content = mmap(NULL, process->filesize, PROT_READ, MAP_PRIVATE, process->fd_in, 0);

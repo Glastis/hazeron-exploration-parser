@@ -29,9 +29,7 @@ struct                      s_process
     int                     fd_in;
     int                     fd_out;
     unsigned int            filesize;
-    int                     system_opened;
-    int                     sector_opened;
-    int                     galaxy_opened;
+    void                    (*open_location)(struct s_opt *, struct s_process *, unsigned int *i);
 };
 
 typedef struct s_opt        t_opt;

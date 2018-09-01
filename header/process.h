@@ -7,20 +7,14 @@
 
 #include "structure.h"
 
-#define READ_SIZE                                   100u /* Must be greater than flags and ressources names */
+#define FLAG_GALAXY_ATR_NAME                        "name"
+#define FLAG_GALAXY                                 "galaxy"
+#define FLAG_SECTOR_ATR_NAME                        "name"
+#define FLAG_SECTOR                                 "sector"
+#define FLAG_SYSTEM_ATR_NAME                        "name"
+#define FLAG_SYSTEM                                 "system"
 
-#define FLAG_GALAXY_NAME_BEG                        "<galaxy name=\""
-#define FLAG_GALAXY_NAME_END                        "\">"
-#define FLAG_GALAXY_BEG                             FLAG_GALAXY_NAME_BEG
-#define FLAG_GALAXY_END                             "</galaxy>"
-#define FLAG_SECTOR_NAME_BEG                        "<sector name=\""
-#define FLAG_SECTOR_NAME_END                        "\">"
-#define FLAG_SECTOR_BEG                             FLAG_SECTOR_NAME_BEG
-#define FLAG_SECTOR_END                             "</sector>"
-#define FLAG_SYSTEM_NAME_BEG                        "<system name=\""
-#define FLAG_SYSTEM_NAME_END                        "\">"
-#define FLAG_SYSTEM_BEG                             FLAG_SYSTEM_NAME_BEG
-#define FLAG_SYSTEM_END                             "</system>"
+#define ERROR_GALAXY_NOT_FOUND                      ""
 
 int                         core_process(t_opt *opt);
 

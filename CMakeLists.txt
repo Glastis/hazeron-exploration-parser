@@ -7,6 +7,6 @@ add_executable(${PROJECT_NAME}
         main.c              header/main.h
         utilities.c         header/utilities.h
         process.c           header/process.h
-        header/structure.h )
+        header/structure.h xml_parser.c header/xml_parser.h)
 
 target_link_libraries(${PROJECT_NAME} pthread)

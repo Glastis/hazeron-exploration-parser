@@ -27,7 +27,7 @@
 
 #define ERROR_ARGUMENT_IGNORED                      "Argument ignored/unknown. See --help or -h to get usage."
 #define ERROR_ARGUMENT_VALUE                        "Argument must be followed by value. See --help or -h to get usage."
-#define ERROR_BAD_TREAD_AMOUNT                      "Thread number must be more than 0"
+#define ERROR_ARGUMENT_MULTIPLE_LOCATION            "Multiple locations. That's galaxy OR sector OR system."
 
 
 #define THREAD_DEFAULT_DOWNLOAD                     4u
