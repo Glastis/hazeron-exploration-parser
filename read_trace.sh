@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 if test ! -f "$1"
 then
     echo "Error: executable $1 does not exist."
@@ -11,6 +11,9 @@ then
 fi
 EXECUTABLE="$1"
 TRACELOG="$2"
+RED="\e[31m"
+GREEN="\e[32m"
+WHITE="\e[39m"
 while read LINETYPE FADDR CADDR CTIME; do
     FNAME="$(addr2line -f -e ${EXECUTABLE} ${FADDR}|head -1)"
     CDATE="$(date -Iseconds -d @${CTIME})"
@@ -18,10 +21,10 @@ while read LINETYPE FADDR CADDR CTIME; do
     then
 	CNAME="$(addr2line -f -e ${EXECUTABLE} ${CADDR}|head -1)"
 	CLINE="$(addr2line -s -e ${EXECUTABLE} ${CADDR})"
-	echo "Enter ${FNAME} at ${CDATE}, called from ${CNAME} (${CLINE})"
+	echo -e "$GREEN \bEnter$WHITE ${FNAME} at ${CDATE}, called from ${CNAME} (${CLINE})"
     fi
     if test "${LINETYPE}" = "x"
     then
-	echo "Exit  ${FNAME} at ${CDATE}"
+	echo -e "$RED \bExit$WHITE ${FNAME} at ${CDATE}"
     fi
     done < "${TRACELOG}"

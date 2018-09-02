@@ -14,7 +14,7 @@
 #define FLAG_SYSTEM_ATR_NAME                        "name"
 #define FLAG_SYSTEM                                 "system"
 
-#define ERROR_GALAXY_NOT_FOUND                      ""
+#define ERROR_LOCATION_NOT_FOUND                    "Location not found"
 
 int                         core_process(t_opt *opt);
 

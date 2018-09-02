@@ -21,6 +21,19 @@ void                                                        str_init(t_str *str)
     str->len = 0;
 }
 
+void                                                        print_line(const char *str)
+{
+    unsigned int                                            i;
+
+    i = 0;
+    while (str[i] && str[i] != '\n')
+    {
+        printf("%c", str[i]);
+        ++i;
+    }
+    printf("\n");
+}
+
 inline __attribute__((always_inline)) void                  error(const char *error)
 {
     fprintf(stderr, "Error: %s\n", error);

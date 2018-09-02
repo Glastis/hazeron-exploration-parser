@@ -19,14 +19,24 @@
 #define ERROR_MALFORMED_XML                         "Malformed XML"
 #define WARNING_BAD_USAGE_SKIP_FLAG_NAME            "skip_flag_name: bad usage"
 
-unsigned int                get_atr_value(const char *str, const char *atr, char *dest);
+enum                        e_state
+{
+    OPEN,
+    CLOSE,
+    ALL
+};
+
+typedef enum e_state        t_state;
+
+int                         is_atr_value(const char *str, const char *atr, const char *value);
+int                         get_atr_value(const char *str, const char *atr, char *dest);
 int                         get_flag_opened(const char *str, char *dest);
 int                         get_flag_closed(const char *str, char *dest);
 int                         is_flag_opened(const char *str);
 int                         is_flag_closed(const char *str);
 int                         is_this_flag_opened(const char *str, const char *flag);
 int                         is_this_flag_closed(const char *str, const char *flag);
-int                         get_next_flag(const char *str, const char *flag, unsigned int *ret);
-unsigned int                move_to_flag(const char *str, const char *flag, const char *flagid, const char *flagid_value);
+int                         get_next_flag(const char *str, const char *flag, unsigned int *ret, t_state state);
+int                         move_to_flag(const char *str, const char *flag, const char *flagid, const char *flagid_value, unsigned int *ret);
 
 #endif /* !DOWNLOADER_XML_PARSER_H */
