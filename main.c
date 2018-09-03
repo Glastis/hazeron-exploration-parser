@@ -25,8 +25,8 @@ static void                 init_opt(t_opt *opt, t_opt_init *init)
     opt->sector = NULL;
     opt->galaxy = NULL;
     opt->ressource = NULL;
-    opt->min_quality = -1;
-    opt->max_quality = -1;
+    opt->min_quality = atoi(RESSOURCE_QUALITY_MIN);
+    opt->max_quality = atoi(RESSOURCE_QUALITY_MAX);
     opt->outfile = NULL;
 
     init->min_quality = NULL;
@@ -50,8 +50,8 @@ static int                  get_opt_detect(char **opt, const int next, const cha
 
 static void                 get_opt_init_cleanup(t_opt *opt, t_opt_init *init)
 {
-    opt->max_quality = init->max_quality ? atoi(init->max_quality) : -1;
-    opt->min_quality = init->min_quality ? atoi(init->min_quality) : -1;
+    opt->max_quality = init->max_quality ? atoi(init->max_quality) : atoi(RESSOURCE_QUALITY_MIN);
+    opt->min_quality = init->min_quality ? atoi(init->min_quality) : atoi(RESSOURCE_QUALITY_MAX);
 }
 
 static void                 get_opt(t_opt *opt, const char **av, const int ac)

@@ -29,11 +29,8 @@
 #define ERROR_ARGUMENT_VALUE                        "Argument must be followed by value. See --help or -h to get usage."
 #define ERROR_ARGUMENT_MULTIPLE_LOCATION            "Multiple locations. That's galaxy OR sector OR system."
 
-
-#define THREAD_DEFAULT_DOWNLOAD                     4u
-#define THREAD_DEFAULT_CONVERT                      4u
-#define THREAD_MIN_DOWNLOAD                         1u
-#define THREAD_MIN_CONVERT                          1u
+#define RESSOURCE_QUALITY_MIN                       "0"
+#define RESSOURCE_QUALITY_MAX                       "255"
 
 int                         main(int ac, const char **av);
 

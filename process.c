@@ -9,6 +9,8 @@
 #include "header/xml_parser.h"
 #include "header/process.h"
 #include "header/utilities.h"
+#include "header/location.h"
+#include "header/location_new.h"
 
 static int                  open_location_galaxy(t_process *process, unsigned int *i)
 {
@@ -36,6 +38,8 @@ static void                 process_get_file(t_opt *opt, t_process *process)
 
 static void                 init_process(t_opt *opt, t_process *process)
 {
+    process->galaxy = safe_malloc(1, sizeof(t_galaxy *));
+    process->galaxy[0] = NULL;
     process->location = safe_malloc(1, sizeof(t_location));
     if (opt->galaxy)
     {
@@ -76,13 +80,26 @@ static void                 process_flag_check_closed_location(t_process *proces
         {
             close(process->fd_out);
         }
-        exit(42);
+        exit(EXIT_SUCCESS);
     }
+}
+
+static int                  process_check_system(t_opt *opt, t_process *process, char *str)
+{
+    if (is_this_flag_opened(str, FLAG_SYSTEM) && is_system_surveyed(str))
+    {
+        if (opt->ressource)
+        {
+            check_and_add_ressource(opt, process, str);
+        }
+    }
+    return (FALSE);
 }
 
 static void                 process_flag(t_opt *opt, t_process *process, char *str)
 {
     process_flag_check_closed_location(process, str);
+    process_check_system(opt, process, str);
     print_line(str);
     UNUSED(opt);
 }
@@ -97,6 +114,7 @@ static void                 process_content(t_opt *opt, t_process *process)
         fprintf(stderr, "%s: ", process->location->name);
         error(ERROR_LOCATION_NOT_FOUND);
     }
+    add_galaxy(&process->content[i], process);
     while (get_next_flag(&process->content[i], NULL, &i, ALL))
     {
         process_flag(opt, process, &process->content[i]);

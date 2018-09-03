@@ -2,6 +2,8 @@ SRC=			    ./main.c \
 			        ./utilities.c \
 			        ./process.c \
                     ./xml_parser.c \
+                    ./location.c \
+                    ./location_new.c \
 
 SRC_NOTRACE=        ./trace.c \
 

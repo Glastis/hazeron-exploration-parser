@@ -14,6 +14,8 @@
 #define ERROR_OPEN_FAILED_READ                      "Failed to open file for reading"
 #define ERROR_OPEN_FAILED_WRITE                     "Failed to open file for writing"
 
+#include <stdlib.h>
+
 struct                      s_str
 {
     size_t                  len;
