@@ -22,29 +22,19 @@ void                        search_and_set_atr(const char *xml, const char *atr_
 /**
 *** Galaxy
 **/
-void                        init_galaxy(t_galaxy *galaxy, const char *name, t_sector **sector)
-{
-    galaxy->name = str_coupler(name, NULL);
-    galaxy->sector = sector;
-}
-
-int                         add_galaxy(const char *xml, t_process *process)
+void                        add_galaxy(const char *xml, t_process *process)
 {
     t_galaxy                *galaxy_new;
-    char                    buff_name[BUFFER_NAME_SIZE];
     unsigned int            i;
 
     i = 0;
     galaxy_new = safe_malloc(1, sizeof(t_galaxy));
     while (process->galaxy[i++]);
     process->galaxy = safe_realloc(process->galaxy, i + 1, sizeof(t_galaxy *));
-    if (!get_atr_value(xml, FLAG_GALAXY_ATR_NAME, buff_name))
-    {
-        return (FALSE);
-    }
-    init_galaxy(galaxy_new, buff_name, NULL);
+    search_and_set_atr(xml, FLAG_GALAXY_ATR_NAME, &galaxy_new->name);
+    galaxy_new->sector = NULL;
     process->galaxy[i - 1] = galaxy_new;
-    return (TRUE);
+    process->galaxy[i] = NULL;
 }
 
 /**
@@ -60,18 +50,18 @@ void                        init_sector(const char *xml, t_sector *sector, t_gal
     sector->system = NULL;
 }
 
-int                         add_sector(const char *xml, t_galaxy **galaxy)
+void                        add_sector(const char *xml, t_galaxy **galaxy)
 {
     t_sector                *sector_new;
     unsigned int            i;
 
     i = 0;
     sector_new = safe_malloc(1, sizeof(t_sector));
+    init_sector(xml, sector_new, galaxy);
     while (galaxy[0]->sector[i++]);
     galaxy[0]->sector = safe_realloc(galaxy[0]->sector, i + 1, sizeof(t_sector *));
-    init_sector(xml, sector_new, galaxy);
     galaxy[0]->sector[i - 1] = sector_new;
-    return (TRUE);
+    galaxy[0]->sector[i] = NULL;
 }
 
 /**
@@ -87,24 +77,23 @@ void                        init_system(const char *xml, t_system *system, t_sec
     system->planet = NULL;
 }
 
-int                         add_system(const char *xml, t_sector **sector)
+void                        add_system(const char *xml, t_sector **sector)
 {
     t_system                *system_new;
     unsigned int            i;
 
     i = 0;
     system_new = safe_malloc(1, sizeof(t_system));
+    init_system(xml, system_new, sector);
     while (sector[0]->system[i++]);
     sector[0]->system = safe_realloc(sector[0]->system, i + 1, sizeof(t_system *));
-    init_system(xml, system_new, sector);
     sector[0]->system[i - 1] = system_new;
-    return (TRUE);
+    sector[0]->system[i] = NULL;
 }
 
 /**
 *** Planet
 **/
-
 static void                 planet_get_size(const char *xml, t_planet *planet)
 {
     unsigned int            i;
@@ -129,24 +118,23 @@ void                        init_planet(const char *xml, t_planet *planet, t_sys
     planet->ressource = NULL;
 }
 
-int                         add_planet(const char *xml, t_system **system)
+void                        add_planet(const char *xml, t_system **system)
 {
     t_planet                *planet_new;
     unsigned int            i;
 
     i = 0;
     planet_new = safe_malloc(1, sizeof(t_planet));
+    init_planet(xml, planet_new, system);
     while (system[0]->planet[i++]);
     system[0]->planet = safe_realloc(system[0]->planet, i + 1, sizeof(t_planet *));
-    init_planet(xml, planet_new, system);
     system[0]->planet[i - 1] = planet_new;
-    return (TRUE);
+    system[0]->planet[i] = NULL;
 }
 
 /**
 *** Ressources
 **/
-
 void                        init_ressource(const char *xml, t_ressource *ressource, t_planet **planet)
 {
 
@@ -160,16 +148,20 @@ void                        init_ressource(const char *xml, t_ressource *ressour
     ressource->planet = planet[0];
 }
 
-int                         add_ressource(const char *xml, t_planet **planet)
+void                        add_ressource(const char *xml, t_planet **planet, t_process *process)
 {
     t_ressource                *ressource_new;
     unsigned int            i;
 
     i = 0;
     ressource_new = safe_malloc(1, sizeof(t_ressource));
+    init_ressource(xml, ressource_new, planet);
     while (planet[0]->ressource[i++]);
     planet[0]->ressource = safe_realloc(planet[0]->ressource, i + 1, sizeof(t_ressource *));
-    init_ressource(xml, ressource_new, planet);
     planet[0]->ressource[i - 1] = ressource_new;
-    return (TRUE);
+    planet[0]->ressource[i] = NULL;
+    while (process->ressource[i++]);
+    process->ressource = safe_realloc(process->ressource, i + 1, sizeof(t_ressource *));
+    process->ressource[i - 1] = ressource_new;
+    process->ressource[i] = NULL;
 }

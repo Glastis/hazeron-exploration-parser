@@ -94,6 +94,7 @@ struct                      s_process
     int                     fd_out;
     unsigned int            filesize;
     struct s_galaxy         **galaxy;
+    struct s_ressource      **ressource;
     struct s_location       *location;
     int                     (*open_location)(struct s_process *, unsigned int *i);
 };
